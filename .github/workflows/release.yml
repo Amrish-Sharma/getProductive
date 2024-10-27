@@ -15,14 +15,18 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '11'
+          java-version: '17'  # Set Java version to 17
+          distribution: 'temurin'  # Specify the Java distribution
+          java-package: jdk
+          architecture: x64
+          check-latest: false
 
       - name: Build APK
-        run: ./gradlew assembleRelease # Adjust if your build command is different
+        run: ./gradlew assembleRelease  # Build the release APK
 
       - name: Upload APK as Release Asset
         uses: softprops/action-gh-release@v1
         with:
-          files: app/build/outputs/apk/release/app-release.apk # Update with your APK path
+          files: app/build/outputs/apk/release/app-release.apk  # Update with your APK path
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
