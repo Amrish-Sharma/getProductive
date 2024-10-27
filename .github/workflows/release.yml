@@ -20,6 +20,8 @@ jobs:
           java-package: jdk
           architecture: x64
           check-latest: false
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
       - name: Build APK
         run: ./gradlew assembleRelease  # Build the release APK

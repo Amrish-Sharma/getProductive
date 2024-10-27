@@ -38,12 +38,3 @@ jobs:
 
       - name: Build APK
         run: ./gradlew assembleRelease --no-daemon
-
-      - name: List Bundled APKs
-        run: ls -l app/build/outputs/apk/release/
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release.apk
-          path: app/build/outputs/apk/release/app-release.apk
