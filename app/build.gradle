@@ -21,9 +21,9 @@ android {
     signingConfigs {
         release {
             storeFile file('app-release-key.jks') // Path to your keystore
-            storePassword storePassword // Your keystore password
+            storePassword 'axway123' // Your keystore password
             keyAlias 'codebuzz' // Your key alias
-            keyPassword keyPassword // Your key password
+            keyPassword 'axway123' // Your key password
         }
     }
 
