@@ -15,30 +15,41 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('app-release-key.jks') // Path to your keystore
+            storePassword storePassword // Your keystore password
+            keyAlias 'codebuzz' // Your key alias
+            keyPassword keyPassword // Your key password
+        }
     }
 
     buildTypes {
         release {
+            signingConfig signingConfigs.release // Use the signing config for release builds
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = '11'
     }
+
     buildFeatures {
         compose true
     }
 }
 
 dependencies {
-
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.activity.compose
@@ -57,5 +68,4 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.6.1' // Use the latest version if possible
-
 }
