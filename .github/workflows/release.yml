@@ -1,0 +1,28 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Build APK
+        run: ./gradlew assembleRelease # Adjust if your build command is different
+
+      - name: Upload APK as Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app/build/outputs/apk/release/app-release.apk # Update with your APK path
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
