@@ -18,8 +18,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String PENDING_TASKS_KEY = "pending_tasks";
     private static final String COMPLETED_TASKS_KEY = "completed_tasks";
+
+    private static final String ARCHIVED_TASKS_KEY = "archived_tasks";
     private List<Task> pendingTasks;
     private List<Task> completedTasks;
+
+    private List<Task> archivedTasks;
     private TaskAdapter pendingAdapter;
     private TaskAdapter completedAdapter;
     private SharedPreferences sharedPreferences;
@@ -34,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         // Load tasks from SharedPreferences
         pendingTasks = loadTasks(PENDING_TASKS_KEY);
         completedTasks = loadTasks(COMPLETED_TASKS_KEY);
+        archivedTasks = loadTasks(ARCHIVED_TASKS_KEY);
 
         RecyclerView pendingTasksList = findViewById(R.id.pendingTasksList);
         RecyclerView completedTasksList = findViewById(R.id.completedTasksList);
@@ -58,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
                 taskInput.setText("");
             }
         });
+        // Archive tasks that have been completed for more than 24 hours
+        archiveOldCompletedTasks();
     }
 
     // Method to toggle task between pending and completed
@@ -94,7 +101,23 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PENDING_TASKS_KEY, new Gson().toJson(pendingTasks));
         editor.putString(COMPLETED_TASKS_KEY, new Gson().toJson(completedTasks));
+        editor.putString(ARCHIVED_TASKS_KEY, new Gson().toJson(archivedTasks));
         editor.apply();
+    }
+
+    // Method to archive tasks that have been completed for more than 24 hours
+    private void archiveOldCompletedTasks() {
+        long currentTime = System.currentTimeMillis();
+        List<Task> tasksToArchive = new ArrayList<>();
+        for (Task task : completedTasks) {
+            if (currentTime - task.getDatetimeCreated() > 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+                tasksToArchive.add(task);
+            }
+        }
+        completedTasks.removeAll(tasksToArchive);
+        archivedTasks.addAll(tasksToArchive);
+        completedAdapter.notifyDataSetChanged();
+        saveTasks();
     }
 }
 
