@@ -3,9 +3,11 @@ package com.cb.getproductive;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,14 +20,16 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String PENDING_TASKS_KEY = "pending_tasks";
     private static final String COMPLETED_TASKS_KEY = "completed_tasks";
-
     private static final String ARCHIVED_TASKS_KEY = "archived_tasks";
+
     private List<Task> pendingTasks;
     private List<Task> completedTasks;
-
     private List<Task> archivedTasks;
+
     private TaskAdapter pendingAdapter;
     private TaskAdapter completedAdapter;
+    private ArchivedTaskAdapter archivedAdapter;
+
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -42,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView pendingTasksList = findViewById(R.id.pendingTasksList);
         RecyclerView completedTasksList = findViewById(R.id.completedTasksList);
+        ExpandableListView archivedTasksList = findViewById(R.id.archivedTasksList);
+
 
         pendingTasksList.setLayoutManager(new LinearLayoutManager(this));
         completedTasksList.setLayoutManager(new LinearLayoutManager(this));
@@ -49,9 +55,11 @@ public class MainActivity extends AppCompatActivity {
         // Set up adapters for pending and completed tasks
         pendingAdapter = new TaskAdapter(pendingTasks, this::toggleTask);
         completedAdapter = new TaskAdapter(completedTasks, this::toggleTask);
+        archivedAdapter = new ArchivedTaskAdapter(this, archivedTasks);
 
         pendingTasksList.setAdapter(pendingAdapter);
         completedTasksList.setAdapter(completedAdapter);
+        archivedTasksList.setAdapter(archivedAdapter);
 
         // Set up button for adding new tasks
         EditText taskInput = findViewById(R.id.taskInput);
@@ -117,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         completedTasks.removeAll(tasksToArchive);
         archivedTasks.addAll(tasksToArchive);
         completedAdapter.notifyDataSetChanged();
+        archivedAdapter.notifyDataSetChanged();
         saveTasks();
     }
 }
