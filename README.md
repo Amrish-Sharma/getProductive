@@ -16,7 +16,7 @@ GetProductive is an Android app designed to help users manage their tasks effici
 
 - **Language:** Java
 - **Framework:** Android
-- **Minimum Android Version:** [Insert Minimum Version]
+- **Minimum Android Version:** v12
 - **Dependencies:** Gson for JSON serialization and deserialization
 
 ## Installation
