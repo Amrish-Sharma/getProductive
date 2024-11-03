@@ -3,9 +3,11 @@ package com.cb.getproductive;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,10 +20,16 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final String PENDING_TASKS_KEY = "pending_tasks";
     private static final String COMPLETED_TASKS_KEY = "completed_tasks";
+    private static final String ARCHIVED_TASKS_KEY = "archived_tasks";
+
     private List<Task> pendingTasks;
     private List<Task> completedTasks;
+    private List<Task> archivedTasks;
+
     private TaskAdapter pendingAdapter;
     private TaskAdapter completedAdapter;
+    private ArchivedTaskAdapter archivedAdapter;
+
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -34,9 +42,12 @@ public class MainActivity extends AppCompatActivity {
         // Load tasks from SharedPreferences
         pendingTasks = loadTasks(PENDING_TASKS_KEY);
         completedTasks = loadTasks(COMPLETED_TASKS_KEY);
+        archivedTasks = loadTasks(ARCHIVED_TASKS_KEY);
 
         RecyclerView pendingTasksList = findViewById(R.id.pendingTasksList);
         RecyclerView completedTasksList = findViewById(R.id.completedTasksList);
+        ExpandableListView archivedTasksList = findViewById(R.id.archivedTasksList);
+
 
         pendingTasksList.setLayoutManager(new LinearLayoutManager(this));
         completedTasksList.setLayoutManager(new LinearLayoutManager(this));
@@ -44,9 +55,11 @@ public class MainActivity extends AppCompatActivity {
         // Set up adapters for pending and completed tasks
         pendingAdapter = new TaskAdapter(pendingTasks, this::toggleTask);
         completedAdapter = new TaskAdapter(completedTasks, this::toggleTask);
+        archivedAdapter = new ArchivedTaskAdapter(this, archivedTasks);
 
         pendingTasksList.setAdapter(pendingAdapter);
         completedTasksList.setAdapter(completedAdapter);
+        archivedTasksList.setAdapter(archivedAdapter);
 
         // Set up button for adding new tasks
         EditText taskInput = findViewById(R.id.taskInput);
@@ -58,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 taskInput.setText("");
             }
         });
+        // Archive tasks that have been completed for more than 24 hours
+        archiveOldCompletedTasks();
     }
 
     // Method to toggle task between pending and completed
@@ -94,7 +109,24 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PENDING_TASKS_KEY, new Gson().toJson(pendingTasks));
         editor.putString(COMPLETED_TASKS_KEY, new Gson().toJson(completedTasks));
+        editor.putString(ARCHIVED_TASKS_KEY, new Gson().toJson(archivedTasks));
         editor.apply();
+    }
+
+    // Method to archive tasks that have been completed for more than 24 hours
+    private void archiveOldCompletedTasks() {
+        long currentTime = System.currentTimeMillis();
+        List<Task> tasksToArchive = new ArrayList<>();
+        for (Task task : completedTasks) {
+            if (currentTime - task.getDatetimeCreated() > 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+                tasksToArchive.add(task);
+            }
+        }
+        completedTasks.removeAll(tasksToArchive);
+        archivedTasks.addAll(tasksToArchive);
+        completedAdapter.notifyDataSetChanged();
+        archivedAdapter.notifyDataSetChanged();
+        saveTasks();
     }
 }
 
