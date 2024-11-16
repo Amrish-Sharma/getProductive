@@ -2,12 +2,12 @@ package com.cb.getproductive;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private ArchivedTaskAdapter archivedAdapter;
 
     private SharedPreferences sharedPreferences;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sharedPreferences = getSharedPreferences("tasks_pref", MODE_PRIVATE);
+        handler = new Handler(Looper.getMainLooper());
 
         // Load tasks from SharedPreferences
         pendingTasks = loadTasks(PENDING_TASKS_KEY);
@@ -77,16 +79,20 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to toggle task between pending and completed
     private void toggleTask(Task task) {
-        if (task.isCompleted()) {
-            pendingTasks.remove(task);
-            completedTasks.add(task);
-        } else {
-            completedTasks.remove(task);
-            pendingTasks.add(task);
-        }
-        pendingAdapter.notifyDataSetChanged();
-        completedAdapter.notifyDataSetChanged();
-        saveTasks();
+        handler.post(() -> {
+            if (task.isCompleted()) {
+                if (pendingTasks.remove(task)) {
+                    completedTasks.add(task);
+                }
+            } else {
+                if (completedTasks.remove(task)) {
+                    pendingTasks.add(task);
+                }
+            }
+            pendingAdapter.notifyDataSetChanged();
+            completedAdapter.notifyDataSetChanged();
+            saveTasks();
+        });
     }
 
     // Method to add new task to pending list
